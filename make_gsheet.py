@@ -15,13 +15,15 @@ def name(name):
 
 
 def get_item_info(itemid):
-    with open("item.cache", "r") as cache:
-        try:
+    try:
+        with open("item.cache", "r") as cache:
             itemcache = json.load(cache)
-        except json.decoder.JSONDecodeError:
-            itemcache = {}
+    except FileNotFoundError:
+        itemcache = {}
+    except json.decoder.JSONDecodeError:
+        itemcache = {}
     if itemid not in itemcache:
-        r = requests.get(f"https://www.wowhead.com/de/item={itemid}&xml")
+        r = requests.get(f"https://www.wowhead.com/wotlk/de/item={itemid}&xml")
         itemcache[itemid] = xmltodict.parse(r.content)
         with open("item.cache", "w") as cache:
             cache.write(json.dumps(itemcache))
