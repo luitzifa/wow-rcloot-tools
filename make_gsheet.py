@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import csv
-from pdb import set_trace
 import click
 import pygsheets
 import requests
@@ -187,26 +186,27 @@ def cli(document, title, cred_file, csvfiles):
                     f'=HYPERLINK("{item[4]}";"{item[3]}")',
                 ]
             )
-    # import pdb
-
-    # pdb.set_trace()
     client = pygsheets.authorize(service_account_file=cred_file)
     sh = client.open(document)
-    wks_dummy = sh.add_worksheet("dummy")
     try:
         wks_overview = sh.worksheet_by_title(title)
         wks_items = sh.worksheet_by_title(f"{title}_items")
-        sh.del_worksheet(wks_overview)
-        sh.del_worksheet(wks_items)
+        wks_overview.clear()
+        wks_items.clear()
     except:
-        pass
-    wks_overview = sh.add_worksheet(title)
-    wks_items = sh.add_worksheet(f"{title}_items")
-    sh.del_worksheet(wks_dummy)
+        wks_overview = sh.add_worksheet(title)
+        wks_items = sh.add_worksheet(f"{title}_items")
 
     wks_overview.update_values("A1", overview_sheet_content)
     wks_items.update_values("A1", item_sheet_content)
+   
+    cells = wks_overview.get_row(1, returnas='cell', include_tailing_empty=False)
+    wks_overview.frozen_rows = 1
+    cellcount = len(overview_sheet_content[0])
+    for cell in cells:
+        cell.set_text_rotation("angle", 90)
 
+    wks_overview.adjust_column_width(1, cellcount, None)
 
 if __name__ == "__main__":
     cli()
