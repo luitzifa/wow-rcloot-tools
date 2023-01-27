@@ -37,14 +37,11 @@ def get_item_slot(item):
     orig_item_slot = item["wowhead"]["item"]["inventorySlot"].get("#text")
     if orig_item_slot == "In Schildhand geführt":
         orig_item_slot = "Schildhand"
-    if "Buchband" in name:
-        orig_item_slot = "Buchband"
-    if "Götze" in name:
-        orig_item_slot = "Götze"
-    if "Totem" in name:
-        orig_item_slot = "Totem"
-    if "Siegel" in name:
-        orig_item_slot = "Siegel"
+    if orig_item_slot == "Waffenhand":
+        orig_item_slot = "Einhändig"
+    if name in ["Buchband", "Götze", "Totem", "Siegel"] or orig_item_slot in ["Distanz"]:
+        orig_item_slot = "Distanz/Relikt"
+
     new_item_slot = slotdb.get(itemid)
     if new_item_slot:
         return new_item_slot.lower()
