@@ -15,7 +15,7 @@ def name(name):
 
 def get_item_info(itemid):
     try:
-        with open("item.cache", "r") as cache:
+        with open("item.cache", "r", encoding="utf-8") as cache:
             itemcache = json.load(cache)
     except FileNotFoundError:
         itemcache = {}
@@ -24,13 +24,13 @@ def get_item_info(itemid):
     if itemid not in itemcache:
         r = requests.get(f"https://www.wowhead.com/wotlk/de/item={itemid}&xml")
         itemcache[itemid] = xmltodict.parse(r.content)
-        with open("item.cache", "w") as cache:
+        with open("item.cache", "w", encoding="utf-8") as cache:
             cache.write(json.dumps(itemcache))
     return itemcache[itemid]
 
 
 def get_item_slot(item):
-    with open("itemslot_overwrite.json", "r") as db:
+    with open("itemslot_overwrite.json", "r", encoding="utf-8") as db:
         slotdb = json.load(db)
     itemid = item["wowhead"]["item"]["@id"]
     name = item["wowhead"]["item"]["name"]
@@ -39,7 +39,9 @@ def get_item_slot(item):
         orig_item_slot = "Schildhand"
     if orig_item_slot == "Waffenhand":
         orig_item_slot = "Einhändig"
-    if name in ["Buchband", "Götze", "Totem", "Siegel"] or orig_item_slot in ["Distanz"]:
+    if name in ["Buchband", "Götze", "Totem", "Siegel"] or orig_item_slot in [
+        "Distanz"
+    ]:
         orig_item_slot = "Distanz/Relikt"
 
     new_item_slot = slotdb.get(itemid)
@@ -196,14 +198,37 @@ def cli(document, title, cred_file, csvfiles):
 
     wks_overview.update_values("A1", overview_sheet_content)
     wks_items.update_values("A1", item_sheet_content)
-   
-    cells = wks_overview.get_row(1, returnas='cell', include_tailing_empty=False)
-    wks_overview.frozen_rows = 1
-    cellcount = len(overview_sheet_content[0])
-    for cell in cells:
-        cell.set_text_rotation("angle", 90)
 
-    wks_overview.adjust_column_width(1, cellcount, None)
+    wks_overview.frozen_rows = 1
+    wks_items.frozen_rows = 1
+
+    colors = {
+        "head": (217, 217, 217),
+        0: (246, 178, 107),
+        1: (249, 203, 156),
+        2: (252, 229, 205),
+        3: (255, 243, 229),
+    }
+
+    for rownumber in range(len(overview_sheet_content)):
+        cells = wks_overview.get_row(
+            rownumber, returnas="cell", include_tailing_empty=False
+        )
+        for icell, cell in enumerate(cells):
+            if rownumber == 1:
+                cell.set_text_rotation("angle", 90)
+                cell.color = colors["head"]
+            if ((rownumber - 1) % 4) == 0:
+                if icell in list(range(1, 5)):
+                    cell.color = colors[icell]
+            if icell > 6:
+                cell.color = colors[(rownumber - 1) % 4]
+
+    ocolcount = len(overview_sheet_content[0])
+    icolcount = len(item_sheet_content[0])
+    wks_overview.adjust_column_width(1, ocolcount, None)
+    wks_items.adjust_column_width(1, icolcount, None)
+
 
 if __name__ == "__main__":
     cli()
