@@ -15,7 +15,7 @@ def name(name):
 
 def get_item_info(itemid):
     try:
-        with open("item.cache", "r") as cache:
+        with open("item.cache", "r", encoding="utf-8") as cache:
             itemcache = json.load(cache)
     except FileNotFoundError:
         itemcache = {}
@@ -24,13 +24,13 @@ def get_item_info(itemid):
     if itemid not in itemcache:
         r = requests.get(f"https://www.wowhead.com/wotlk/de/item={itemid}&xml")
         itemcache[itemid] = xmltodict.parse(r.content)
-        with open("item.cache", "w") as cache:
+        with open("item.cache", "w", encoding="utf-8") as cache:
             cache.write(json.dumps(itemcache))
     return itemcache[itemid]
 
 
 def get_item_slot(item):
-    with open("itemslot_overwrite.json", "r") as db:
+    with open("itemslot_overwrite.json", "r", encoding="utf-8") as db:
         slotdb = json.load(db)
     itemid = item["wowhead"]["item"]["@id"]
     name = item["wowhead"]["item"]["name"]
@@ -39,8 +39,12 @@ def get_item_slot(item):
         orig_item_slot = "Schildhand"
     if orig_item_slot == "Waffenhand":
         orig_item_slot = "Einhändig"
-    if name in ["Buchband", "Götze", "Totem", "Siegel"] or orig_item_slot in ["Distanz"]:
-        orig_item_slot = "Distanz/Relikt"
+    if name in ["Buchband", "Götze", "Totem", "Siegel"] or orig_item_slot in [
+        "Distanz",
+        "Relikt",
+        "Wurfwaffe",
+    ]:
+        orig_item_slot = "Distanz & Co"
 
     new_item_slot = slotdb.get(itemid)
     if new_item_slot:
@@ -85,7 +89,7 @@ def cli(document, title, cred_file, csvfiles):
         "Schulter",
         "Rücken",
         "Brust",
-        "Handgelenk",
+        "Handgelenke",
         "Hände",
         "Taille",
         "Beine",
@@ -127,7 +131,7 @@ def cli(document, title, cred_file, csvfiles):
             )
 
             known_slots = list([_.lower() for _ in itemslots + sheet_header_end])
-            if item_slot.lower() not in known_slots:
+            if item_slot.lower() not in known_slots and rtype in rtypes_of_interest:
                 itemslots.append(item_slot.capitalize())
 
             if item_slot not in char_loot[player]:
