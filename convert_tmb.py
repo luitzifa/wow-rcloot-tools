@@ -2,9 +2,9 @@
 
 import pathlib
 
-filter_items = ["43346", "43345", "43954", "37254"]
+filter_items = ["43346", "43345", "43954", "37254", "49294", "49295"]
 filter_offspec = ["Nebenspezialisierung"]
-filter_type = ["Entzaubern", "Bankfach"]
+filter_type = ["Entzaubern", "Bankfach", "Beruf", "Verwürfelt"]
 filter_offspec_lines = []
 filter_item_lines = []
 full_history = []
@@ -17,9 +17,14 @@ def search_filter(filter, line):
             return True
     return False
 
-def slashfy_line(line):
+def slashfy_date(line):
     lines = line.split(",")
     lines[1] = lines[1].replace(".", "/")
+    return ",".join(lines)     
+
+def dottyfy_date(line):
+    lines = line.split(",")
+    lines[1] = lines[1].replace("/", ".")
     return ",".join(lines)     
 
 for raw_file in pathlib.Path(".").glob("*_raw.txt"):
@@ -42,24 +47,24 @@ for raw_file in pathlib.Path(".").glob("*_raw.txt"):
                 filter_offspec_lines.append(line)
                 continue
             full_history.append(line)
-            fde.write(line + "\n")
-            fen.write(slashfy_line(line) + "\n")
+            fde.write(dottyfy_date(line) + "\n")
+            fen.write(slashfy_date(line) + "\n")
 
 roll_fn = "roll_recipients_{}.txt"
 with open(roll_fn.format("DE"), "w", encoding='utf8') as fde, open(roll_fn.format("EN"), "w", encoding='utf8') as fen:
     fde.write(headerline + "\n")
     fen.write(headerline + "\n")
     for line in filter_item_lines:
-        fde.write(line + "\n")
-        fen.write(slashfy_line(line) + "\n")
+        fde.write(dottyfy_date(line) + "\n")
+        fen.write(slashfy_date(line) + "\n")
 
 roll_fn = "offspec_recipients_{}.txt"
 with open(roll_fn.format("DE"), "w", encoding='utf8') as fde, open(roll_fn.format("EN"), "w", encoding='utf8') as fen:
     fde.write(headerline + "\n")
     fen.write(headerline + "\n")
     for line in filter_offspec_lines:
-        fde.write(line + "\n")
-        fen.write(slashfy_line(line) + "\n")
+        fde.write(dottyfy_date(line) + "\n")
+        fen.write(slashfy_date(line) + "\n")
 
 all_fn = "loot_all_clean_{}.txt"
 with open(all_fn.format("DE"), "w", encoding='utf8') as fde, open(all_fn.format("EN"), "w", encoding='utf8') as fen:
@@ -68,5 +73,5 @@ with open(all_fn.format("DE"), "w", encoding='utf8') as fde, open(all_fn.format(
     for line in full_history:
         if line == headerline:
             continue
-        fde.write(line + "\n")
-        fen.write(slashfy_line(line) + "\n")
+        fde.write(dottyfy_date(line) + "\n")
+        fen.write(slashfy_date(line) + "\n")
