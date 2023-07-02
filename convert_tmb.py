@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import pathlib
 
 filter_items = ["43346", "43345", "43954", "37254"]
