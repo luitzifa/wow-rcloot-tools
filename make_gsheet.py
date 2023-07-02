@@ -62,7 +62,6 @@ def get_item_slot(item):
 def cli(document, title, cred_file, csvfiles):
     sheet_header_begin = [
         "Player",
-        "Hardmode",
         "BiS",
         "Upgrade",
         "Offspec",
@@ -79,7 +78,6 @@ def cli(document, title, cred_file, csvfiles):
         "Hauptspezialisierung/Bedarf": "bis",
         "Verwürfelt": "roll",
         "Upgrade für Mainspec": "upgrade",
-        "Hardmode": "hardmode",
     }
     overview_sheet_content = []
     item_sheet_content = []
@@ -100,7 +98,7 @@ def cli(document, title, cred_file, csvfiles):
         "Einhändig",
         "Schildhand",
     ]
-    rtypes_of_interest = ["hardmode", "bis", "upgrade", "offspec"]
+    rtypes_of_interest = ["bis", "upgrade", "offspec"]
     char_loot = {}
     for file in csvfiles:
         loot = csv.DictReader(file)
@@ -112,7 +110,6 @@ def cli(document, title, cred_file, csvfiles):
             if player not in char_loot:
                 char_loot[player] = {}
                 char_loot[player]["items"] = []
-                char_loot[player]["hardmode"] = 0
                 char_loot[player]["bis"] = 0
                 char_loot[player]["upgrade"] = 0
                 char_loot[player]["offspec"] = 0
@@ -145,9 +142,15 @@ def cli(document, title, cred_file, csvfiles):
     item_sheet_content.append(["Player", "Date", "Reason", "Slot", "Item"])
 
     for player, v in sorted(char_loot.items()):
-        v["items"].sort(
-            key=lambda i: datetime.datetime.strptime(i[0], "%d.%m.%y"), reverse=True
-        )
+        try:
+            v["items"].sort(
+                key=lambda i: datetime.datetime.strptime(i[0], "%d.%m.%y"), reverse=True
+            )
+        except:
+            v["items"].sort(
+                key=lambda i: datetime.datetime.strptime(i[0], "%d/%m/%y"), reverse=True
+            )
+
 
         rownumber = 0
         for rtype in rtypes_of_interest:
